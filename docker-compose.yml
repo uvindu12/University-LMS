@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    networks:
+      - lms-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    environment:
+      - DATABASE_URL=postgres://user:password@db:5432/lms
+    depends_on:
+      - db
+    networks:
+      - lms-network
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=lms
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - lms-network
+
+networks:
+  lms-network:
+    driver: bridge
+
+volumes:
+  db_data:
